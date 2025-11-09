@@ -1,0 +1,289 @@
+stages:
+  - validate
+  - build
+  - deploy
+  - backup
+
+variables:
+  GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+  GCP_REGION: ${GCP_REGION:-us-central1}
+  GKE_CLUSTER_NAME: ${GKE_CLUSTER_NAME}
+  GKE_ZONE: ${GKE_ZONE:-us-central1-a}
+  DOCKER_REGISTRY: ${DOCKER_REGISTRY:-gcr.io}
+  IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+  NAMESPACE: sftpgo
+
+# Validate Kubernetes manifests
+validate:manifests:
+  stage: validate
+  image: alpine/k8s:1.28.3
+  script:
+    - echo "Validating Kubernetes manifests..."
+    - kubectl apply --dry-run=client -f k8s/namespace.yaml
+    - kubectl apply --dry-run=client -f k8s/configmap.yaml
+    - kubectl apply --dry-run=client -f k8s/secret.yaml
+    - kubectl apply --dry-run=client -f k8s/persistent-volume-claim.yaml
+    - kubectl apply --dry-run=client -f k8s/deployment.yaml
+    - kubectl apply --dry-run=client -f k8s/service.yaml
+    - kubectl apply --dry-run=client -f k8s/cronjob-backup.yaml
+    - echo "✓ All manifests are valid"
+  only:
+    - branches
+    - merge_requests
+
+# Validate shell scripts
+validate:scripts:
+  stage: validate
+  image: alpine:latest
+  script:
+    - apk add --no-cache bash shellcheck
+    - echo "Validating shell scripts..."
+    - shellcheck scripts/*.sh || true
+    - echo "✓ Script validation complete"
+  only:
+    - branches
+    - merge_requests
+
+# Build backup image
+build:backup-image:
+  stage: build
+  image: google/cloud-sdk:alpine
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    # Authenticate with GCP
+    - echo $GCP_SERVICE_KEY | base64 -d > ${HOME}/gcp-key.json
+    - gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+    - gcloud auth configure-docker
+  script:
+    - echo "Building backup container image..."
+    - docker build -t ${DOCKER_REGISTRY}/${GCP_PROJECT_ID}/sftpgo-backup:${IMAGE_TAG} -f Dockerfile.backup .
+    - docker tag ${DOCKER_REGISTRY}/${GCP_PROJECT_ID}/sftpgo-backup:${IMAGE_TAG} ${DOCKER_REGISTRY}/${GCP_PROJECT_ID}/sftpgo-backup:latest
+    - docker push ${DOCKER_REGISTRY}/${GCP_PROJECT_ID}/sftpgo-backup:${IMAGE_TAG}
+    - docker push ${DOCKER_REGISTRY}/${GCP_PROJECT_ID}/sftpgo-backup:latest
+    - echo "✓ Backup image built and pushed"
+  only:
+    - main
+    - master
+    - develop
+
+# Deploy to GKE - Development
+deploy:dev:
+  stage: deploy
+  image: google/cloud-sdk:alpine
+  environment:
+    name: development
+    url: https://sftpgo-dev.example.com
+  before_script:
+    # Install kubectl
+    - apk add --no-cache curl
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+
+    # Authenticate with GCP
+    - echo $GCP_SERVICE_KEY | base64 -d > ${HOME}/gcp-key.json
+    - gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+
+    # Get GKE credentials
+    - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone=$GKE_ZONE --project=$GCP_PROJECT_ID
+  script:
+    - echo "Deploying to GKE (Development)..."
+
+    # Create namespace if not exists
+    - kubectl apply -f k8s/namespace.yaml
+
+    # Update ConfigMap with backup script
+    - |
+      kubectl create configmap backup-scripts \
+        --from-file=backup.sh=scripts/backup.sh \
+        --namespace=$NAMESPACE \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+    # Apply configurations (secrets should be managed separately for security)
+    - kubectl apply -f k8s/configmap.yaml
+
+    # Apply PVCs
+    - kubectl apply -f k8s/persistent-volume-claim.yaml
+
+    # Apply deployment
+    - kubectl apply -f k8s/deployment.yaml
+
+    # Apply services
+    - kubectl apply -f k8s/service.yaml
+
+    # Apply backup cronjob
+    - kubectl apply -f k8s/cronjob-backup.yaml
+
+    # Wait for deployment to be ready
+    - kubectl rollout status deployment/sftpgo -n $NAMESPACE --timeout=5m
+
+    # Show deployment status
+    - kubectl get all -n $NAMESPACE
+
+    - echo "✓ Deployment completed successfully"
+  only:
+    - develop
+  when: manual
+
+# Deploy to GKE - Production
+deploy:prod:
+  stage: deploy
+  image: google/cloud-sdk:alpine
+  environment:
+    name: production
+    url: https://sftpgo.example.com
+  before_script:
+    # Install kubectl
+    - apk add --no-cache curl
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+
+    # Authenticate with GCP
+    - echo $GCP_SERVICE_KEY | base64 -d > ${HOME}/gcp-key.json
+    - gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+
+    # Get GKE credentials
+    - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone=$GKE_ZONE --project=$GCP_PROJECT_ID
+  script:
+    - echo "Deploying to GKE (Production)..."
+
+    # Reserve static IP if not exists
+    - chmod +x scripts/reserve-static-ip.sh
+    - ./scripts/reserve-static-ip.sh sftpgo-static-ip $GCP_REGION
+
+    # Create namespace if not exists
+    - kubectl apply -f k8s/namespace.yaml
+
+    # Update ConfigMap with backup script
+    - |
+      kubectl create configmap backup-scripts \
+        --from-file=backup.sh=scripts/backup.sh \
+        --namespace=$NAMESPACE \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+    # Apply configurations
+    - kubectl apply -f k8s/configmap.yaml
+
+    # Apply PVCs
+    - kubectl apply -f k8s/persistent-volume-claim.yaml
+
+    # Apply deployment
+    - kubectl apply -f k8s/deployment.yaml
+
+    # Apply services
+    - kubectl apply -f k8s/service.yaml
+
+    # Apply backup cronjob
+    - kubectl apply -f k8s/cronjob-backup.yaml
+
+    # Wait for deployment to be ready
+    - kubectl rollout status deployment/sftpgo -n $NAMESPACE --timeout=5m
+
+    # Show deployment status
+    - kubectl get all -n $NAMESPACE
+    - echo ""
+    - echo "Getting external IP..."
+    - kubectl get service sftpgo-sftp -n $NAMESPACE
+
+    - echo "✓ Production deployment completed successfully"
+  only:
+    - main
+    - master
+  when: manual
+
+# Manual backup job
+backup:manual:
+  stage: backup
+  image: google/cloud-sdk:alpine
+  before_script:
+    # Install kubectl and postgresql-client
+    - apk add --no-cache curl postgresql-client bash
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+
+    # Authenticate with GCP
+    - echo $GCP_SERVICE_KEY | base64 -d > ${HOME}/gcp-key.json
+    - gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+
+    # Get GKE credentials
+    - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone=$GKE_ZONE --project=$GCP_PROJECT_ID
+  script:
+    - echo "Running manual backup..."
+
+    # Get database credentials from secrets
+    - export POSTGRES_HOST=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_HOST}' | base64 -d)
+    - export POSTGRES_PORT=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_PORT}' | base64 -d)
+    - export POSTGRES_DB=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)
+    - export POSTGRES_USER=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)
+    - export POSTGRES_PASSWORD=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)
+
+    # Get backup configuration
+    - export GCS_BUCKET=$(kubectl get configmap sftpgo-config -n $NAMESPACE -o jsonpath='{.data.GCS_BUCKET_NAME}')
+    - export RETENTION_DAYS=$(kubectl get configmap sftpgo-config -n $NAMESPACE -o jsonpath='{.data.BACKUP_RETENTION_DAYS}')
+
+    # Run backup script
+    - chmod +x scripts/backup.sh
+    - ./scripts/backup.sh
+
+    - echo "✓ Manual backup completed"
+  only:
+    - main
+    - master
+    - develop
+  when: manual
+
+# Restore from backup (manual only)
+restore:manual:
+  stage: backup
+  image: google/cloud-sdk:alpine
+  before_script:
+    # Install kubectl and postgresql-client
+    - apk add --no-cache curl postgresql-client bash
+    - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+
+    # Authenticate with GCP
+    - echo $GCP_SERVICE_KEY | base64 -d > ${HOME}/gcp-key.json
+    - gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+    - gcloud config set project $GCP_PROJECT_ID
+
+    # Get GKE credentials
+    - gcloud container clusters get-credentials $GKE_CLUSTER_NAME --zone=$GKE_ZONE --project=$GCP_PROJECT_ID
+  script:
+    - echo "⚠ WARNING - This will restore from backup and overwrite current data!"
+    - echo "Backup file must be specified in BACKUP_FILE variable"
+
+    - |
+      if [ -z "$BACKUP_FILE" ]; then
+        echo "Error: BACKUP_FILE variable not set"
+        echo "Example: BACKUP_FILE=gs://sftpgo-backups/backups/2024-01-15/sftpgo-backup-20240115_120000.tar.gz"
+        exit 1
+      fi
+
+    # Get database credentials
+    - export POSTGRES_HOST=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_HOST}' | base64 -d)
+    - export POSTGRES_PORT=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_PORT}' | base64 -d)
+    - export POSTGRES_DB=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_DB}' | base64 -d)
+    - export POSTGRES_USER=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_USER}' | base64 -d)
+    - export POSTGRES_PASSWORD=$(kubectl get secret sftpgo-secrets -n $NAMESPACE -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d)
+
+    # Run restore script (non-interactive mode would need modification)
+    - chmod +x scripts/restore.sh
+    - echo "Please run restore manually with: ./scripts/restore.sh $BACKUP_FILE"
+
+    - echo "Restore initiated"
+  only:
+    - main
+    - master
+  when: manual

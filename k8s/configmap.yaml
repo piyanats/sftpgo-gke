@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sftpgo-config
+  namespace: sftpgo
+data:
+  # SFTPGo configuration
+  SFTPGO_DATA_PROVIDER__DRIVER: "postgresql"
+  SFTPGO_DATA_PROVIDER__NAME: "sftpgo"
+  SFTPGO_DATA_PROVIDER__USERS_TABLE: "users"
+  SFTPGO_DATA_PROVIDER__MANAGE_USERS: "1"
+  SFTPGO_DATA_PROVIDER__TRACK_QUOTA: "2"
+  SFTPGO_DATA_PROVIDER__POOL_SIZE: "10"
+  SFTPGO_DATA_PROVIDER__UPDATE_MODE: "1"
+
+  # SFTP service configuration
+  SFTPGO_SFTPD__BINDINGS__0__PORT: "2022"
+  SFTPGO_SFTPD__BINDINGS__0__ADDRESS: "0.0.0.0"
+
+  # HTTP/HTTPS configuration for web admin
+  SFTPGO_HTTPD__BINDINGS__0__PORT: "8080"
+  SFTPGO_HTTPD__BINDINGS__0__ADDRESS: "0.0.0.0"
+
+  # FTP service (optional)
+  SFTPGO_FTPD__BINDINGS__0__PORT: "2121"
+  SFTPGO_FTPD__BINDINGS__0__ADDRESS: "0.0.0.0"
+
+  # WebDAV service (optional)
+  SFTPGO_WEBDAVD__BINDINGS__0__PORT: "8090"
+  SFTPGO_WEBDAVD__BINDINGS__0__ADDRESS: "0.0.0.0"
+
+  # Backup configuration
+  GCS_BUCKET_NAME: "sftpgo-backups"
+  BACKUP_RETENTION_DAYS: "30"

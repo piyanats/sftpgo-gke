@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sftpgo
+  labels:
+    name: sftpgo
+    app: sftpgo

@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sftpgo
+  namespace: sftpgo
+  labels:
+    app: sftpgo
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: sftpgo
+  template:
+    metadata:
+      labels:
+        app: sftpgo
+    spec:
+      serviceAccountName: sftpgo
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+      - name: sftpgo
+        image: drakkan/sftpgo:v2.5
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: sftp
+          containerPort: 2022
+          protocol: TCP
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: ftp
+          containerPort: 2121
+          protocol: TCP
+        - name: webdav
+          containerPort: 8090
+          protocol: TCP
+        env:
+        # PostgreSQL connection from secrets
+        - name: SFTPGO_DATA_PROVIDER__HOST
+          valueFrom:
+            secretKeyRef:
+              name: sftpgo-secrets
+              key: POSTGRES_HOST
+        - name: SFTPGO_DATA_PROVIDER__PORT
+          valueFrom:
+            secretKeyRef:
+              name: sftpgo-secrets
+              key: POSTGRES_PORT
+        - name: SFTPGO_DATA_PROVIDER__USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: sftpgo-secrets
+              key: POSTGRES_USER
+        - name: SFTPGO_DATA_PROVIDER__PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sftpgo-secrets
+              key: POSTGRES_PASSWORD
+        - name: SFTPGO_DATA_PROVIDER__NAME
+          valueFrom:
+            secretKeyRef:
+              name: sftpgo-secrets
+              key: POSTGRES_DB
+
+        # Configuration from ConfigMap
+        - name: SFTPGO_DATA_PROVIDER__DRIVER
+          valueFrom:
+            configMapKeyRef:
+              name: sftpgo-config
+              key: SFTPGO_DATA_PROVIDER__DRIVER
+        - name: SFTPGO_DATA_PROVIDER__TRACK_QUOTA
+          valueFrom:
+            configMapKeyRef:
+              name: sftpgo-config
+              key: SFTPGO_DATA_PROVIDER__TRACK_QUOTA
+        - name: SFTPGO_SFTPD__BINDINGS__0__PORT
+          valueFrom:
+            configMapKeyRef:
+              name: sftpgo-config
+              key: SFTPGO_SFTPD__BINDINGS__0__PORT
+        - name: SFTPGO_SFTPD__BINDINGS__0__ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: sftpgo-config
+              key: SFTPGO_SFTPD__BINDINGS__0__ADDRESS
+        - name: SFTPGO_HTTPD__BINDINGS__0__PORT
+          valueFrom:
+            configMapKeyRef:
+              name: sftpgo-config
+              key: SFTPGO_HTTPD__BINDINGS__0__PORT
+        - name: SFTPGO_HTTPD__BINDINGS__0__ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: sftpgo-config
+              key: SFTPGO_HTTPD__BINDINGS__0__ADDRESS
+
+        volumeMounts:
+        - name: data
+          mountPath: /srv/sftpgo
+        - name: home
+          mountPath: /var/lib/sftpgo
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
+
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: sftpgo-data
+      - name: home
+        persistentVolumeClaim:
+          claimName: sftpgo-home
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sftpgo
+  namespace: sftpgo
+  labels:
+    app: sftpgo

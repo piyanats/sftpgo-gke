@@ -1,0 +1,22 @@
+# Dockerfile for SFTPGo Backup Job
+FROM google/cloud-sdk:alpine
+
+# Install required tools
+RUN apk add --no-cache \
+    postgresql-client \
+    bash \
+    curl \
+    kubectl
+
+# Copy backup and restore scripts
+COPY scripts/backup.sh /usr/local/bin/backup.sh
+COPY scripts/restore.sh /usr/local/bin/restore.sh
+
+# Make scripts executable
+RUN chmod +x /usr/local/bin/backup.sh /usr/local/bin/restore.sh
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["/usr/local/bin/backup.sh"]

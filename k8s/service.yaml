@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sftpgo-sftp
+  namespace: sftpgo
+  labels:
+    app: sftpgo
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
+spec:
+  type: LoadBalancer
+  # Uncomment and set the static IP after creating it with reserve-static-ip.sh
+  # loadBalancerIP: "YOUR_STATIC_IP_ADDRESS"
+  externalTrafficPolicy: Local
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: sftp
+    port: 22
+    targetPort: 2022
+    protocol: TCP
+  - name: ftp
+    port: 21
+    targetPort: 2121
+    protocol: TCP
+  selector:
+    app: sftpgo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sftpgo-web
+  namespace: sftpgo
+  labels:
+    app: sftpgo
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: webdav
+    port: 8090
+    targetPort: 8090
+    protocol: TCP
+  selector:
+    app: sftpgo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sftpgo-internal
+  namespace: sftpgo
+  labels:
+    app: sftpgo
+spec:
+  type: ClusterIP
+  ports:
+  - name: sftp
+    port: 2022
+    targetPort: 2022
+    protocol: TCP
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: ftp
+    port: 2121
+    targetPort: 2121
+    protocol: TCP
+  - name: webdav
+    port: 8090
+    targetPort: 8090
+    protocol: TCP
+  selector:
+    app: sftpgo

@@ -1,0 +1,42 @@
+# Environment files
+.env
+.env.*
+
+# GCP credentials
+*.json
+!k8s/secret.yaml
+
+# Backup files
+*.dump
+*.tar.gz
+*.sql
+
+# Static IP file
+.static-ip-address
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Kubernetes temporary files
+*.yaml.bak
+*.yml.bak
+
+# Logs
+*.log
+logs/
+
+# GitLab CI local
+.gitlab-ci-local/
