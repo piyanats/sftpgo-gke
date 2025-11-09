@@ -70,9 +70,9 @@ cd sftpgo-gke
 
 ```bash
 export GCP_PROJECT_ID="project-id-ของคุณ"
-export GCP_REGION="us-central1"
+export GCP_REGION="asia-southeast1"
 export GKE_CLUSTER_NAME="ชื่อ-gke-cluster-ของคุณ"
-export GKE_ZONE="us-central1-a"
+export GKE_ZONE="asia-southeast1-a"
 ```
 
 โหลดตัวแปรสภาพแวดล้อม:
@@ -192,7 +192,7 @@ gcloud iam service-accounts keys create sftpgo-backup-key.json \
 
 ```bash
 chmod +x scripts/reserve-static-ip.sh
-./scripts/reserve-static-ip.sh sftpgo-static-ip $GCP_REGION
+./scripts/reserve-static-ip.sh sftpgo-static-ip asia-southeast1
 ```
 
 สคริปต์จะแสดง static IP address ของคุณ บันทึกค่านี้ไว้
@@ -415,9 +415,9 @@ sftp -P 22 admin@$SFTP_IP
 | ตัวแปร | ค่า | Protected | Masked |
 |--------|-----|-----------|--------|
 | `GCP_PROJECT_ID` | project-id ของคุณ | ✓ | ✗ |
-| `GCP_REGION` | us-central1 | ✗ | ✗ |
+| `GCP_REGION` | asia-southeast1 | ✗ | ✗ |
 | `GKE_CLUSTER_NAME` | ชื่อ cluster ของคุณ | ✗ | ✗ |
-| `GKE_ZONE` | us-central1-a | ✗ | ✗ |
+| `GKE_ZONE` | asia-southeast1-a | ✗ | ✗ |
 | `GCP_SERVICE_KEY` | service account key ที่ encode เป็น Base64 | ✓ | ✓ |
 
 ### 2. สร้าง Service Account สำหรับ GitLab

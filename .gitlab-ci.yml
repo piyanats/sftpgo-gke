@@ -6,9 +6,9 @@ stages:
 
 variables:
   GCP_PROJECT_ID: ${GCP_PROJECT_ID}
-  GCP_REGION: ${GCP_REGION:-us-central1}
+  GCP_REGION: ${GCP_REGION:-asia-southeast1}
   GKE_CLUSTER_NAME: ${GKE_CLUSTER_NAME}
-  GKE_ZONE: ${GKE_ZONE:-us-central1-a}
+  GKE_ZONE: ${GKE_ZONE:-asia-southeast1-a}
   DOCKER_REGISTRY: ${DOCKER_REGISTRY:-gcr.io}
   IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
   NAMESPACE: sftpgo

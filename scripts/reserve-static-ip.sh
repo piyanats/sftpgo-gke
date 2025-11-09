@@ -7,7 +7,7 @@ set -e
 
 # Default values
 IP_NAME="${1:-sftpgo-static-ip}"
-REGION="${2:-us-central1}"
+REGION="${2:-asia-southeast1}"
 PROJECT_ID="${GCP_PROJECT_ID:-$(gcloud config get-value project)}"
 
 echo "================================================"

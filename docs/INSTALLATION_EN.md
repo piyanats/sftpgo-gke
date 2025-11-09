@@ -70,9 +70,9 @@ Create a file named `.env` (don't commit this file!):
 
 ```bash
 export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="us-central1"
+export GCP_REGION="asia-southeast1"
 export GKE_CLUSTER_NAME="your-gke-cluster"
-export GKE_ZONE="us-central1-a"
+export GKE_ZONE="asia-southeast1-a"
 ```
 
 Load the environment:
@@ -192,7 +192,7 @@ gcloud iam service-accounts keys create sftpgo-backup-key.json \
 
 ```bash
 chmod +x scripts/reserve-static-ip.sh
-./scripts/reserve-static-ip.sh sftpgo-static-ip $GCP_REGION
+./scripts/reserve-static-ip.sh sftpgo-static-ip asia-southeast1
 ```
 
 The script will output your static IP address. Save this value.
@@ -415,9 +415,9 @@ In your GitLab project, go to **Settings > CI/CD > Variables** and add:
 | Variable | Value | Protected | Masked |
 |----------|-------|-----------|--------|
 | `GCP_PROJECT_ID` | your-project-id | ✓ | ✗ |
-| `GCP_REGION` | us-central1 | ✗ | ✗ |
+| `GCP_REGION` | asia-southeast1 | ✗ | ✗ |
 | `GKE_CLUSTER_NAME` | your-cluster-name | ✗ | ✗ |
-| `GKE_ZONE` | us-central1-a | ✗ | ✗ |
+| `GKE_ZONE` | asia-southeast1-a | ✗ | ✗ |
 | `GCP_SERVICE_KEY` | Base64 encoded service account key | ✓ | ✓ |
 
 ### 2. Create Service Account for GitLab

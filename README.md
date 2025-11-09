@@ -43,7 +43,7 @@ A complete deployment solution for running SFTPGo on Google Kubernetes Engine wi
 2. **Reserve a static IP address**
    ```bash
    chmod +x scripts/reserve-static-ip.sh
-   ./scripts/reserve-static-ip.sh sftpgo-static-ip us-central1
+   ./scripts/reserve-static-ip.sh sftpgo-static-ip asia-southeast1
    ```
 
 3. **Configure secrets**
