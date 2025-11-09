@@ -3,6 +3,9 @@ kind: ConfigMap
 metadata:
   name: sftpgo-config
   namespace: sftpgo
+  labels:
+    app: sftpgo
+    project: sftpgo-gke
 data:
   # SFTPGo configuration
   SFTPGO_DATA_PROVIDER__DRIVER: "postgresql"

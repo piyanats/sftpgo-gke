@@ -5,6 +5,7 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke
 spec:
   replicas: 2
   strategy:
@@ -19,6 +20,7 @@ spec:
     metadata:
       labels:
         app: sftpgo
+        project: sftpgo-gke
     spec:
       serviceAccountName: sftpgo
       securityContext:
@@ -149,3 +151,4 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke

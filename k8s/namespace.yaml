@@ -5,3 +5,4 @@ metadata:
   labels:
     name: sftpgo
     app: sftpgo
+    project: sftpgo-gke

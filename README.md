@@ -80,6 +80,9 @@ A complete deployment solution for running SFTPGo on Google Kubernetes Engine wi
    # Create services
    kubectl apply -f k8s/service.yaml
 
+   # Apply PodDisruptionBudget for high availability
+   kubectl apply -f k8s/poddisruptionbudget.yaml
+
    # Set up backup CronJob
    kubectl apply -f k8s/cronjob-backup.yaml
    ```
@@ -153,6 +156,7 @@ sftpgo-gke/
 │   ├── persistent-volume-claim.yaml  # Storage claims
 │   ├── deployment.yaml         # SFTPGo deployment
 │   ├── service.yaml            # Load balancer services
+│   ├── poddisruptionbudget.yaml # Pod disruption budget for HA
 │   └── cronjob-backup.yaml     # Backup CronJob
 └── scripts/
     ├── reserve-static-ip.sh    # Reserve GCP static IP

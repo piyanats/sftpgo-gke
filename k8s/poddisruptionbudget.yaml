@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sftpgo-pdb
+  namespace: sftpgo
+  labels:
+    app: sftpgo
+    project: sftpgo-gke
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: sftpgo
