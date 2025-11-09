@@ -341,7 +341,21 @@ kubectl apply -f k8s/service.yaml
 kubectl get service sftpgo-sftp -n sftpgo -w
 ```
 
-### 6. ตั้งค่า Backup CronJob
+### 6. Apply PodDisruptionBudget สำหรับความพร้อมใช้งานสูง
+
+```bash
+kubectl apply -f k8s/poddisruptionbudget.yaml
+```
+
+ตรวจสอบ:
+
+```bash
+kubectl get poddisruptionbudget -n sftpgo
+```
+
+ช่วยให้แน่ใจว่ามี SFTPGo pod อย่างน้อย 1 ตัวที่พร้อมใช้งานในระหว่างการบำรุงรักษา node หรืออัปเกรด
+
+### 7. ตั้งค่า Backup CronJob
 
 อันดับแรก อัปเดตสคริปต์สำรองข้อมูลใน ConfigMap:
 

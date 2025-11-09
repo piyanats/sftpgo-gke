@@ -341,7 +341,21 @@ Get external IP (may take a few minutes):
 kubectl get service sftpgo-sftp -n sftpgo -w
 ```
 
-### 6. Setup Backup CronJob
+### 6. Apply PodDisruptionBudget for High Availability
+
+```bash
+kubectl apply -f k8s/poddisruptionbudget.yaml
+```
+
+Verify:
+
+```bash
+kubectl get poddisruptionbudget -n sftpgo
+```
+
+This ensures at least one SFTPGo pod remains available during node maintenance or upgrades.
+
+### 7. Setup Backup CronJob
 
 First, update the backup script in ConfigMap:
 
