@@ -30,9 +30,10 @@
 ### บริการที่จำเป็น
 
 1. **GKE Cluster**
-   - Kubernetes เวอร์ชัน 1.25 ขึ้นไป (จำเป็นสำหรับ CronJob timeZone support)
+   - GKE เวอร์ชัน 1.27 ขึ้นไป (แนะนำ)
+   - ต่ำสุด: GKE 1.25 (จำเป็นสำหรับ CronJob timeZone support)
    - มี node อย่างน้อย 2 ตัว
-   - แนะนำ: n1-standard-2 หรือดีกว่า
+   - แนะนำ machine type: n1-standard-2 หรือดีกว่า
 
 2. **ฐานข้อมูล PostgreSQL ภายนอก**
    - PostgreSQL 12 ขึ้นไป

@@ -26,7 +26,7 @@ A complete deployment solution for running SFTPGo on Google Kubernetes Engine wi
 ### Prerequisites
 
 - Google Cloud Platform account
-- GKE cluster up and running
+- GKE cluster (version 1.27 or later recommended, minimum 1.25 required)
 - External PostgreSQL database
 - Google Cloud Storage bucket for backups
 - `gcloud` CLI installed and configured

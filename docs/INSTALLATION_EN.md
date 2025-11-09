@@ -30,9 +30,10 @@ Complete step-by-step guide for deploying SFTPGo on Google Kubernetes Engine wit
 ### Required Services
 
 1. **GKE Cluster**
-   - Kubernetes version 1.25 or later (required for CronJob timeZone support)
+   - GKE version 1.27 or later (recommended)
+   - Minimum: GKE 1.25 (required for CronJob timeZone support)
    - At least 2 nodes
-   - Recommended: n1-standard-2 or better
+   - Recommended machine type: n1-standard-2 or better
 
 2. **External PostgreSQL Database**
    - PostgreSQL 12 or later

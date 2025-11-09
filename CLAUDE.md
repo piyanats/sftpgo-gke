@@ -10,6 +10,12 @@ This file provides comprehensive context about the SFTPGo GKE deployment project
 
 **Languages**: Bilingual documentation (English and Thai).
 
+**Requirements**:
+- GKE version 1.27 or later (recommended)
+- Minimum: GKE 1.25 (required for CronJob timeZone field support)
+- PostgreSQL 12 or later (external database)
+- Google Cloud Storage for backups
+
 ## Key Technical Decisions
 
 ### Architecture Choices
@@ -284,23 +290,28 @@ gcloud <service> create <name> \
 
 ## Known Constraints and Limitations
 
-1. **SFTPGo Version**: Currently pinned to v2.5.x
+1. **GKE Version Requirement**: Minimum GKE 1.25, recommended 1.27 or later
+   - Rationale: CronJob timeZone field requires Kubernetes 1.25+
+   - Older versions: Must use UTC conversion for backup scheduling
+   - Recommended: Use GKE 1.27+ for stability and long-term support
+
+2. **SFTPGo Version**: Currently pinned to v2.5.x
    - Rationale: Stable release with tested PostgreSQL support
    - Upgrade consideration: Test thoroughly in dev before updating image tag
 
-2. **Static IP Requirement**: Cannot use ephemeral IPs
+3. **Static IP Requirement**: Cannot use ephemeral IPs
    - Reason: SFTP clients need consistent endpoint for firewall rules
    - Cost: Static IPs incur small charge (~$0.01/hour in asia-southeast1)
 
-3. **PostgreSQL External Only**: No in-cluster PostgreSQL option provided
+4. **PostgreSQL External Only**: No in-cluster PostgreSQL option provided
    - Rationale: Production deployments should use managed database (Cloud SQL)
    - If needed: User can add PostgreSQL deployment themselves
 
-4. **Single Namespace**: All resources in `sftpgo` namespace
+5. **Single Namespace**: All resources in `sftpgo` namespace
    - Rationale: Simplifies resource management and RBAC
    - Multi-tenancy: Not supported in current design
 
-5. **Backup Window**: Currently set to 2 AM Asia/Bangkok time
+6. **Backup Window**: Currently set to 2 AM Asia/Bangkok time
    - Uses Kubernetes timeZone field (requires Kubernetes 1.25+)
    - Users can modify CronJob schedule and timezone in `k8s/cronjob-backup.yaml` if different time needed
 
