@@ -117,7 +117,8 @@ gcloud sql instances create sftpgo-db \
   --tier=db-custom-2-7680 \
   --region=$GCP_REGION \
   --network=default \
-  --no-assign-ip
+  --no-assign-ip \
+  --labels=app=sftpgo,project=sftpgo-gke
 ```
 
 #### Create Database and User
@@ -163,6 +164,10 @@ If using external PostgreSQL:
 
 ```bash
 gsutil mb -p $GCP_PROJECT_ID -c STANDARD -l $GCP_REGION gs://sftpgo-backups-$GCP_PROJECT_ID
+
+# Add labels to the bucket
+gsutil label ch -l app:sftpgo gs://sftpgo-backups-$GCP_PROJECT_ID
+gsutil label ch -l project:sftpgo-gke gs://sftpgo-backups-$GCP_PROJECT_ID
 ```
 
 ### 2. Create Service Account for Backups
@@ -200,9 +205,10 @@ The script will output your static IP address. Save this value.
 ### Alternative Manual Method
 
 ```bash
-# Reserve IP
+# Reserve IP with labels
 gcloud compute addresses create sftpgo-static-ip \
-  --region=$GCP_REGION
+  --region=$GCP_REGION \
+  --labels=app=sftpgo,project=sftpgo-gke
 
 # Get the IP address
 gcloud compute addresses describe sftpgo-static-ip \

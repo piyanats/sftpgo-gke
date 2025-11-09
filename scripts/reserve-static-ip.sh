@@ -27,11 +27,13 @@ else
     echo "Creating new static IP address..."
     gcloud compute addresses create "$IP_NAME" \
         --region="$REGION" \
-        --project="$PROJECT_ID"
+        --project="$PROJECT_ID" \
+        --labels="app=sftpgo,project=sftpgo-gke"
 
     IP_ADDRESS=$(gcloud compute addresses describe "$IP_NAME" --region="$REGION" --project="$PROJECT_ID" --format="get(address)")
     echo "✓ Static IP created successfully"
     echo "  IP Address: $IP_ADDRESS"
+    echo "  Labels: app=sftpgo, project=sftpgo-gke"
 fi
 
 echo ""

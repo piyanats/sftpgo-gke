@@ -5,6 +5,10 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke
+  annotations:
+    # GCP disk labels (applied to underlying GCE persistent disk)
+    volume.beta.kubernetes.io/storage-labels: "app=sftpgo,project=sftpgo-gke"
 spec:
   accessModes:
     - ReadWriteOnce
@@ -20,6 +24,10 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke
+  annotations:
+    # GCP disk labels (applied to underlying GCE persistent disk)
+    volume.beta.kubernetes.io/storage-labels: "app=sftpgo,project=sftpgo-gke"
 spec:
   accessModes:
     - ReadWriteOnce

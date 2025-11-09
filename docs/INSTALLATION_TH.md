@@ -117,7 +117,8 @@ gcloud sql instances create sftpgo-db \
   --tier=db-custom-2-7680 \
   --region=$GCP_REGION \
   --network=default \
-  --no-assign-ip
+  --no-assign-ip \
+  --labels=app=sftpgo,project=sftpgo-gke
 ```
 
 #### สร้างฐานข้อมูลและผู้ใช้
@@ -163,6 +164,10 @@ gcloud sql instances describe sftpgo-db --format="value(ipAddresses[0].ipAddress
 
 ```bash
 gsutil mb -p $GCP_PROJECT_ID -c STANDARD -l $GCP_REGION gs://sftpgo-backups-$GCP_PROJECT_ID
+
+# เพิ่ม labels ให้กับ bucket
+gsutil label ch -l app:sftpgo gs://sftpgo-backups-$GCP_PROJECT_ID
+gsutil label ch -l project:sftpgo-gke gs://sftpgo-backups-$GCP_PROJECT_ID
 ```
 
 ### 2. สร้าง Service Account สำหรับสำรองข้อมูล
@@ -200,9 +205,10 @@ chmod +x scripts/reserve-static-ip.sh
 ### วิธีแบบ Manual
 
 ```bash
-# จอง IP
+# จอง IP พร้อม labels
 gcloud compute addresses create sftpgo-static-ip \
-  --region=$GCP_REGION
+  --region=$GCP_REGION \
+  --labels=app=sftpgo,project=sftpgo-gke
 
 # รับค่า IP address
 gcloud compute addresses describe sftpgo-static-ip \

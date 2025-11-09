@@ -19,6 +19,7 @@ A complete deployment solution for running SFTPGo on Google Kubernetes Engine wi
 - ✅ **Persistent storage** for SFTPGo data and user files
 - ✅ **Multi-protocol support**: SFTP, FTP, WebDAV
 - ✅ **Web admin interface** for easy management
+- ✅ **GCP resource labeling** for cost tracking and organization
 
 ## Quick Start
 
@@ -143,7 +144,8 @@ sftpgo-gke/
 │   ├── INSTALLATION_EN.md      # English installation guide
 │   ├── INSTALLATION_TH.md      # Thai installation guide
 │   ├── FAQ_EN.md               # English FAQ
-│   └── FAQ_TH.md               # Thai FAQ
+│   ├── FAQ_TH.md               # Thai FAQ
+│   └── GCP_LABELS.md           # GCP resource labeling guide
 ├── k8s/
 │   ├── namespace.yaml          # Kubernetes namespace
 │   ├── configmap.yaml          # Configuration
@@ -164,6 +166,7 @@ sftpgo-gke/
 - [Installation Guide (Thai)](docs/INSTALLATION_TH.md)
 - [FAQ (English)](docs/FAQ_EN.md)
 - [FAQ (Thai)](docs/FAQ_TH.md)
+- [GCP Resource Labels Guide](docs/GCP_LABELS.md)
 
 ## Support
 

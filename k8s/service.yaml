@@ -5,8 +5,12 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke
   annotations:
     cloud.google.com/load-balancer-type: "External"
+    # GCP Load Balancer labels
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "sftpgo-backend-config"}'
 spec:
   type: LoadBalancer
   # Uncomment and set the static IP after creating it with reserve-static-ip.sh
@@ -35,6 +39,11 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke
+  annotations:
+    cloud.google.com/load-balancer-type: "External"
+    # GCP Load Balancer labels
+    cloud.google.com/neg: '{"ingress": true}'
 spec:
   type: LoadBalancer
   ports:
@@ -56,6 +65,7 @@ metadata:
   namespace: sftpgo
   labels:
     app: sftpgo
+    project: sftpgo-gke
 spec:
   type: ClusterIP
   ports:
