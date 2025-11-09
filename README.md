@@ -119,7 +119,7 @@ A complete deployment solution for running SFTPGo on Google Kubernetes Engine wi
 │  │              └────────────────┘                         │ │
 │  │                                                          │ │
 │  │  ┌──────────────────────────────────────────┐          │ │
-│  │  │  Backup CronJob (Daily at 2 AM UTC)      │          │ │
+│  │  │  Backup CronJob (Daily at 2 AM Bangkok)    │          │ │
 │  │  └──────────────────┬───────────────────────┘          │ │
 │  │                     │                                   │ │
 │  └─────────────────────┼───────────────────────────────────┘ │

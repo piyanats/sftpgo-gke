@@ -541,7 +541,7 @@ export NAMESPACE=sftpgo
 
 ### Automated Daily Backups
 
-Backups run automatically every day at 2:00 AM UTC via the CronJob.
+Backups run automatically every day at 2:00 AM Asia/Bangkok time (19:00 UTC) via the CronJob.
 
 Check backup job history:
 
