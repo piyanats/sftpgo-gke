@@ -7,8 +7,9 @@ metadata:
     app: sftpgo-backup
     project: sftpgo-gke
 spec:
-  # Run daily at 2 AM Asia/Bangkok (19:00 UTC)
-  schedule: "0 19 * * *"
+  # Run daily at 2 AM Asia/Bangkok time
+  schedule: "0 2 * * *"
+  timeZone: "Asia/Bangkok"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid

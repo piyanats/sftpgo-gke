@@ -30,7 +30,7 @@ Complete step-by-step guide for deploying SFTPGo on Google Kubernetes Engine wit
 ### Required Services
 
 1. **GKE Cluster**
-   - Kubernetes version 1.24 or later
+   - Kubernetes version 1.25 or later (required for CronJob timeZone support)
    - At least 2 nodes
    - Recommended: n1-standard-2 or better
 
@@ -541,7 +541,7 @@ export NAMESPACE=sftpgo
 
 ### Automated Daily Backups
 
-Backups run automatically every day at 2:00 AM Asia/Bangkok time (19:00 UTC) via the CronJob.
+Backups run automatically every day at 2:00 AM Asia/Bangkok time via the CronJob (configured with timeZone: Asia/Bangkok).
 
 Check backup job history:
 

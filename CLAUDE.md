@@ -30,7 +30,7 @@ This file provides comprehensive context about the SFTPGo GKE deployment project
    - LoadBalancer services with static IP for consistent endpoints
 
 4. **Backup Strategy**
-   - Daily automated backups at 2 AM Asia/Bangkok time (19:00 UTC) via CronJob
+   - Daily automated backups at 2 AM Asia/Bangkok time via CronJob (uses timeZone field)
    - Backups include: PostgreSQL dump + SFTPGo data directory + user files
    - Stored in GCS with 30-day retention (configurable)
    - Comprehensive error handling and cleanup mechanisms
@@ -93,7 +93,7 @@ sftpgo-gke/
 │   ├── deployment.yaml         # SFTPGo deployment (2 replicas, v2.5 image)
 │   ├── service.yaml            # 3 services: sftp (LoadBalancer), web (LoadBalancer), internal (ClusterIP)
 │   ├── poddisruptionbudget.yaml  # PDB ensuring minAvailable: 1 pod
-│   └── cronjob-backup.yaml     # Daily backup job at 2 AM Bangkok (19:00 UTC)
+│   └── cronjob-backup.yaml     # Daily backup job at 2 AM Bangkok (uses timeZone)
 │
 └── scripts/
     ├── reserve-static-ip.sh    # Reserve GCP static IP with labels
@@ -147,19 +147,22 @@ sftpgo-gke/
 
 ### Task 3: Changing Backup Schedule
 
-**Location**: `k8s/cronjob-backup.yaml:11`
+**Location**: `k8s/cronjob-backup.yaml:11-12`
 
 ```yaml
-schedule: "0 19 * * *"  # Cron format: minute hour day month weekday
+schedule: "0 2 * * *"      # Cron format: minute hour day month weekday
+timeZone: "Asia/Bangkok"   # IANA timezone (requires Kubernetes 1.25+)
 ```
 
-**Current schedule**: Daily at 2 AM Asia/Bangkok time (19:00 UTC)
+**Current schedule**: Daily at 2 AM Asia/Bangkok time (using timeZone field)
 
 **Common schedules**:
-- Daily at 2 AM Bangkok: `"0 19 * * *"` (19:00 UTC)
-- Daily at 2 AM UTC: `"0 2 * * *"`
-- Every 6 hours: `"0 */6 * * *"`
-- Weekly on Sunday at 3 AM Bangkok: `"0 20 * * 0"` (20:00 UTC on Saturday)
+- Daily at 2 AM Bangkok: `schedule: "0 2 * * *"` with `timeZone: "Asia/Bangkok"`
+- Daily at 2 AM UTC: `schedule: "0 2 * * *"` with `timeZone: "UTC"` (or omit timeZone)
+- Every 6 hours Bangkok time: `schedule: "0 */6 * * *"` with `timeZone: "Asia/Bangkok"`
+- Weekly Sunday at 3 AM Bangkok: `schedule: "0 3 * * 0"` with `timeZone: "Asia/Bangkok"`
+
+**Note**: The `timeZone` field requires Kubernetes 1.25 or later. For older versions, use UTC conversion.
 
 ### Task 4: Updating Documentation
 
@@ -297,8 +300,9 @@ gcloud <service> create <name> \
    - Rationale: Simplifies resource management and RBAC
    - Multi-tenancy: Not supported in current design
 
-5. **Backup Window**: Currently set to 2 AM Asia/Bangkok time (19:00 UTC)
-   - Users can modify CronJob schedule in `k8s/cronjob-backup.yaml` if different time needed
+5. **Backup Window**: Currently set to 2 AM Asia/Bangkok time
+   - Uses Kubernetes timeZone field (requires Kubernetes 1.25+)
+   - Users can modify CronJob schedule and timezone in `k8s/cronjob-backup.yaml` if different time needed
 
 ## Security Considerations
 

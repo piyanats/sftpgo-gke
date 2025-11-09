@@ -87,7 +87,7 @@ However, always test thoroughly in a staging environment first.
 
 ### Q: What Kubernetes version is required?
 
-**A:** Kubernetes 1.24 or later is recommended. The manifests use stable API versions that work with recent Kubernetes releases.
+**A:** Kubernetes 1.25 or later is required. This version adds support for the CronJob `timeZone` field used in the backup schedule. The manifests use stable API versions that work with recent Kubernetes releases.
 
 ---
 
