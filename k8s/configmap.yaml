@@ -24,14 +24,6 @@ data:
   SFTPGO_HTTPD__BINDINGS__0__PORT: "8080"
   SFTPGO_HTTPD__BINDINGS__0__ADDRESS: "0.0.0.0"
 
-  # FTP service (optional)
-  SFTPGO_FTPD__BINDINGS__0__PORT: "2121"
-  SFTPGO_FTPD__BINDINGS__0__ADDRESS: "0.0.0.0"
-
-  # WebDAV service (optional)
-  SFTPGO_WEBDAVD__BINDINGS__0__PORT: "8090"
-  SFTPGO_WEBDAVD__BINDINGS__0__ADDRESS: "0.0.0.0"
-
   # Backup configuration
   GCS_BUCKET_NAME: "sftpgo-backups"
   BACKUP_RETENTION_DAYS: "30"

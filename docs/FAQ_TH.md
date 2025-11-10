@@ -19,7 +19,7 @@
 
 ### ถาม: SFTPGo คืออะไร?
 
-**ตอบ:** SFTPGo เป็นเซิร์ฟเวอร์ SFTP ที่มีฟีเจอร์ครบครันและปรับแต่งได้สูง รองรับ HTTP/S, FTP/S และ WebDAV เป็นตัวเลือก สามารถให้บริการได้ทั้ง local filesystem, S3 (AWS หรือที่เข้ากันได้) และ Google Cloud Storage มี web-based admin interface และรองรับการยืนยันตัวตนหลายแบบ
+**ตอบ:** SFTPGo เป็นเซิร์ฟเวอร์ SFTP ที่มีฟีเจอร์ครบครันและปรับแต่งได้สูง รองรับ HTTP/S สามารถให้บริการได้ทั้ง local filesystem, S3 (AWS หรือที่เข้ากันได้) และ Google Cloud Storage มี web-based admin interface และรองรับการยืนยันตัวตนหลายแบบ
 
 ### ถาม: ทำไมต้องติดตั้ง SFTPGo บน GKE?
 
@@ -145,26 +145,23 @@
 
 ### ถาม: สามารถใช้ Ingress แทน LoadBalancer ได้หรือไม่?
 
-**ตอบ:** สำหรับ HTTP/WebDAV ได้ สำหรับ SFTP/FTP ต้องใช้ LoadBalancer (Layer 4) เพราะ Ingress รองรับเฉพาะ HTTP/HTTPS (Layer 7)
+**ตอบ:** สำหรับ HTTP ได้ สำหรับ SFTP ต้องใช้ LoadBalancer (Layer 4) เพราะ Ingress รองรับเฉพาะ HTTP/HTTPS (Layer 7)
 
 คุณสามารถใช้ทั้งสอง:
-- LoadBalancer สำหรับ SFTP/FTP
-- Ingress สำหรับ HTTP/WebDAV พร้อม SSL termination
+- LoadBalancer สำหรับ SFTP
+- Ingress สำหรับ HTTP พร้อม SSL termination
 
 ### ถาม: จะตั้งค่า SSL/TLS ได้อย่างไร?
 
 **ตอบ:** ตัวเลือก:
 1. **สำหรับ HTTP**: ใช้ Ingress กับ cert-manager สำหรับ Let's Encrypt certificates อัตโนมัติ
 2. **สำหรับ SFTP**: กำหนดค่า SFTPGo ให้ใช้ certificates (mount certificates เป็น secrets)
-3. **สำหรับ FTP**: ใช้ FTPS พร้อม certificates
 
 ### ถาม: มี port อะไรบ้างที่เปิดใช้งาน?
 
 **ตอบ:**
 - Port 22 (2022 ภายใน): SFTP
-- Port 21 (2121 ภายใน): FTP
 - Port 80 (8080 ภายใน): Web UI & API
-- Port 8090: WebDAV
 
 ---
 
@@ -304,9 +301,7 @@ gs://your-bucket/backups/
 
 **ตอบ:**
 - **SFTP**: เข้ารหัสตามค่าเริ่มต้น
-- **FTPS**: กำหนดค่า TLS certificates
-- **HTTP**: ใช้ Ingress พร้อม TLS
-- **WebDAV**: ใช้ HTTPS
+- **HTTP**: ใช้ Ingress พร้อม TLS สำหรับ web interface
 
 ---
 

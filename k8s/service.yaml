@@ -1,8 +1,8 @@
 # SFTPGo Services Configuration
 #
 # This file defines three services:
-# 1. sftpgo-sftp (LoadBalancer) - SFTP/FTP access - REQUIRES static IP
-# 2. sftpgo-web (LoadBalancer) - Web UI and WebDAV - Optional static IP
+# 1. sftpgo-sftp (LoadBalancer) - SFTP access - REQUIRES static IP
+# 2. sftpgo-web (LoadBalancer) - Web UI - Optional static IP
 # 3. sftpgo-internal (ClusterIP) - Internal cluster access only
 #
 # Static IP Recommendations:
@@ -54,10 +54,6 @@ spec:
     port: 22
     targetPort: 2022
     protocol: TCP
-  - name: ftp
-    port: 21
-    targetPort: 2121
-    protocol: TCP
   selector:
     app: sftpgo
 ---
@@ -96,10 +92,6 @@ spec:
     port: 80
     targetPort: 8080
     protocol: TCP
-  - name: webdav
-    port: 8090
-    targetPort: 8090
-    protocol: TCP
   selector:
     app: sftpgo
 ---
@@ -121,14 +113,6 @@ spec:
   - name: http
     port: 8080
     targetPort: 8080
-    protocol: TCP
-  - name: ftp
-    port: 2121
-    targetPort: 2121
-    protocol: TCP
-  - name: webdav
-    port: 8090
-    targetPort: 8090
     protocol: TCP
   selector:
     app: sftpgo

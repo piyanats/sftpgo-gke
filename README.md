@@ -17,7 +17,7 @@ A complete deployment solution for running SFTPGo on Google Kubernetes Engine wi
 - ✅ **GitLab CI/CD pipeline** for automated deployment
 - ✅ **High availability** with multiple replicas
 - ✅ **Persistent storage** for SFTPGo data and user files
-- ✅ **Multi-protocol support**: SFTP, FTP, WebDAV
+- ✅ **SFTP protocol support** with web admin interface
 - ✅ **Web admin interface** for easy management
 - ✅ **GCP resource labeling** for cost tracking and organization
 

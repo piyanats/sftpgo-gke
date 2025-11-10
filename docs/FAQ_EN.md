@@ -19,7 +19,7 @@
 
 ### Q: What is SFTPGo?
 
-**A:** SFTPGo is a fully featured and highly configurable SFTP server with optional HTTP/S, FTP/S and WebDAV support. It can serve local filesystem, S3 (AWS or other compatible) and Google Cloud Storage backends. It provides a web-based admin interface and supports various authentication methods.
+**A:** SFTPGo is a fully featured and highly configurable SFTP server with HTTP/S support. It can serve local filesystem, S3 (AWS or other compatible) and Google Cloud Storage backends. It provides a web-based admin interface and supports various authentication methods.
 
 ### Q: Why deploy SFTPGo on GKE?
 
@@ -145,26 +145,23 @@ Update the `SFTPGO_DATA_PROVIDER__DRIVER` in the ConfigMap accordingly.
 
 ### Q: Can I use an Ingress instead of LoadBalancer?
 
-**A:** For HTTP/WebDAV, yes. For SFTP/FTP, you need a LoadBalancer (Layer 4) since Ingress only supports HTTP/HTTPS (Layer 7).
+**A:** For HTTP, yes. For SFTP, you need a LoadBalancer (Layer 4) since Ingress only supports HTTP/HTTPS (Layer 7).
 
 You can use both:
-- LoadBalancer for SFTP/FTP
-- Ingress for HTTP/WebDAV with SSL termination
+- LoadBalancer for SFTP
+- Ingress for HTTP with SSL termination
 
 ### Q: How do I setup SSL/TLS?
 
 **A:** Options:
 1. **For HTTP**: Use Ingress with cert-manager for automatic Let's Encrypt certificates
 2. **For SFTP**: Configure SFTPGo to use certificates (mount certificates as secrets)
-3. **For FTP**: Use FTPS with certificates
 
 ### Q: What ports are exposed?
 
 **A:**
 - Port 22 (2022 internally): SFTP
-- Port 21 (2121 internally): FTP
 - Port 80 (8080 internally): Web UI & API
-- Port 8090: WebDAV
 
 ---
 
@@ -304,9 +301,7 @@ For database password rotation, update both the secret and the database.
 
 **A:**
 - **SFTP**: Encrypted by default
-- **FTPS**: Configure TLS certificates
-- **HTTP**: Use Ingress with TLS
-- **WebDAV**: Use HTTPS
+- **HTTP**: Use Ingress with TLS for web interface
 
 ---
 
