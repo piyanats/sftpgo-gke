@@ -1,3 +1,16 @@
+# SFTPGo Services Configuration
+#
+# This file defines three services:
+# 1. sftpgo-sftp (LoadBalancer) - SFTP/FTP access - REQUIRES static IP
+# 2. sftpgo-web (LoadBalancer) - Web UI and WebDAV - Optional static IP
+# 3. sftpgo-internal (ClusterIP) - Internal cluster access only
+#
+# Static IP Recommendations:
+# - SFTP Service: REQUIRED - SFTP clients need consistent endpoint for firewall rules
+# - Web Service: OPTIONAL - Can use ephemeral IP unless you need consistent URL
+# - Internal Service: N/A - ClusterIP doesn't support external IPs
+#
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,8 +26,24 @@ metadata:
     cloud.google.com/backend-config: '{"default": "sftpgo-backend-config"}'
 spec:
   type: LoadBalancer
-  # Uncomment and set the static IP after creating it with reserve-static-ip.sh
+
+  # Static IP Configuration
+  # 1. First, reserve a static IP using the script:
+  #    ./scripts/reserve-static-ip.sh sftpgo-static-ip asia-southeast1
+  #
+  # 2. Get the reserved IP address:
+  #    gcloud compute addresses describe sftpgo-static-ip \
+  #      --region=asia-southeast1 \
+  #      --format="get(address)"
+  #
+  # 3. Uncomment and set the IP below:
   # loadBalancerIP: "YOUR_STATIC_IP_ADDRESS"
+  #
+  # Examples:
+  # loadBalancerIP: "34.87.123.45"      # Example IP in asia-southeast1
+  # loadBalancerIP: "35.247.89.123"     # Example IP in asia-southeast1
+  # loadBalancerIP: "34.142.56.78"      # Example IP in asia-southeast1
+
   externalTrafficPolicy: Local
   sessionAffinity: ClientIP
   sessionAffinityConfig:
@@ -46,6 +75,22 @@ metadata:
     cloud.google.com/neg: '{"ingress": true}'
 spec:
   type: LoadBalancer
+
+  # Optional: Static IP for Web Interface
+  # If you want a separate static IP for the web interface:
+  # 1. Reserve another static IP:
+  #    ./scripts/reserve-static-ip.sh sftpgo-web-static-ip asia-southeast1
+  #
+  # 2. Uncomment and set the IP below:
+  # loadBalancerIP: "YOUR_WEB_STATIC_IP_ADDRESS"
+  #
+  # Examples:
+  # loadBalancerIP: "34.87.234.56"      # Example IP for web interface
+  # loadBalancerIP: "35.247.123.89"     # Example IP for web interface
+  #
+  # Note: You can use ephemeral IP (leave commented) for web interface
+  # if you don't need a consistent endpoint
+
   ports:
   - name: http
     port: 80
